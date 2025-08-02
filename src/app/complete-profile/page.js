@@ -1,4 +1,4 @@
-'use client';
+ 'use client';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { completeProfile } from '@/lib/api';
@@ -65,10 +65,11 @@ export default function CompleteProfilePage() {
       });
 
       if (res.data.success) {
+        localStorage.setItem('userId', res.data.data.user.id); 
         localStorage.removeItem('phoneForVerification');
         localStorage.removeItem('sessionId');
         localStorage.removeItem('sessionType');
-        router.push('/login');
+        router.push('/email-verification'); 
       } else {
         const msg =
           res.data.details && typeof res.data.details === 'object'

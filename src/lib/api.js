@@ -29,3 +29,16 @@ export const resendOtp = (phone, sessionType) =>
 // Check signup status
 export const getSignupStatus = (phone) =>
   axios.post(`${API_BASE}/api/auth/signup-status`, { phone });
+
+
+export const sendVerificationEmail = async (userId, email) => {
+  return await axios.post(`${API_BASE}/api/auth/send-verification-email`, {
+    user_id: userId,  // ✅ correct key naming
+    email,
+  });
+};
+
+
+export const verifyEmail = async (token) => {
+  return await axios.get(`${API_BASE}/api/auth/verify-email?token=${token}`);
+};
