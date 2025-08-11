@@ -33,7 +33,7 @@ export const getSignupStatus = (phone) =>
 
 export const sendVerificationEmail = async (userId, email) => {
   return await axios.post(`${API_BASE}/api/auth/send-verification-email`, {
-    user_id: userId,  // ✅ correct key naming
+    user_id: userId, 
     email,
   });
 };

@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { sendVerificationEmail } from '@/lib/api'; // make sure the path is correct
+import { sendVerificationEmail } from '@/lib/api'; 
 import React from 'react';
 
 export default function EmailVerificationPage() {
@@ -59,17 +59,14 @@ export default function EmailVerificationPage() {
       const response = await sendVerificationEmail(userId, email.trim());
 
       if (response.data.success) {
-        setMessage('Verification email sent. Please check your inbox.');
+        setMessage('Verification email sent. Please check your inbox and click the link.');
         setIsError(false);
-        // Do not auto-redirect — let user manually verify or skip
       } else {
         setMessage(response.data.message || 'Failed to send verification email.');
         setIsError(true);
       }
     } catch (err) {
-      setMessage(
-        err.response?.data?.message || 'An error occurred. Please try again.'
-      );
+      setMessage(err.response?.data?.message || 'An error occurred. Please try again.');
       setIsError(true);
     } finally {
       setIsLoading(false);
@@ -77,58 +74,72 @@ export default function EmailVerificationPage() {
   };
 
   const handleSkip = () => {
-    // You may want to mark that user skipped email (in DB or localStorage)
     router.push('/login');
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 shadow-md rounded-md w-full max-w-md"
-      >
-        <h2 className="text-2xl font-semibold mb-6 text-center">Email Verification</h2>
-        <p className="mb-4 text-gray-600">
-          Enter your email address to receive a verification link. Or skip if you want to proceed without verification.
-        </p>
+  <div
+    className="flex items-center justify-center min-h-screen"
+    style={{
+      backgroundImage: `
+        radial-gradient(circle at top right, #A5E3FF 0%, transparent 40%),
+        radial-gradient(circle at bottom left, #A5E3FF 0%, transparent 40%)
+      `,
+    }}
+  >
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white p-8 shadow-md rounded-lg w-full max-w-md border-2 border-gray-300"
+    >
+      <h2 className="text-2xl font-semibold mb-2 text-center">Email Verification</h2>
 
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700 mb-1">
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={handleEmailChange}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-500"
-            placeholder="you@example.com"
-            disabled={isLoading}
-          />
-        </div>
+      <p className="mb-6 text-sm text-center text-gray-700">
+        Enter your <span className="font-medium">Email address</span> to receive a <span className="font-medium">verification</span> link
+        <br />
+        Or skip if you want to proceed without verification
+      </p>
 
-        {message && (
-          <p className={isError ? 'text-red-500 mb-4' : 'text-green-500 mb-4'}>
-            {message}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:bg-blue-300 mb-4"
-          disabled={isLoading || !email.trim()}
-        >
-          {isLoading ? 'Sending...' : 'Send Verification Email'}
-        </button>
-
-        <button
-          type="button"
-          onClick={handleSkip}
-          className="w-full bg-gray-500 text-white py-2 rounded-md hover:bg-gray-600 transition"
+      {/* Email Input */}
+      <div className="mb-4">
+        <label htmlFor="email" className="block text-sm text-gray-700 mb-1">
+          Email
+        </label>
+        <input
+          type="email"
+          value={email}
+          onChange={handleEmailChange}
+          className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-500 text-sm"
+          placeholder="Enter Your Email Address"
           disabled={isLoading}
-        >
-          Skip
-        </button>
-      </form>
-    </div>
-  );
+        />
+      </div>
+
+      {/* Message */}
+      {message && (
+        <p className={`text-sm mb-4 ${isError ? 'text-red-500' : 'text-green-500'}`}>
+          {message}
+        </p>
+      )}
+
+      {/* Send Verification Button */}
+      <button
+        type="submit"
+        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:bg-blue-300 text-sm font-medium"
+        disabled={isLoading || !email.trim()}
+      >
+        {isLoading ? 'Sending...' : 'Send Verification Email'}
+      </button>
+
+      {/* Skip Link */}
+      <button
+        type="button"
+        onClick={handleSkip}
+        className="w-full text-sm text-blue-600 text-center mt-4 hover:underline"
+        disabled={isLoading}
+      >
+        Skip for now →
+      </button>
+    </form>
+  </div>
+);
 }

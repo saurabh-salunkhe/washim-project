@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import React from 'react';
-import { verifyOtp, verifyLoginOtp, resendOtp } from '@/lib/api';
+import { verifyOtp, verifyLoginOtp, resendOtp, getSignupStatus } from '@/lib/api';
 
 export default function VerifyOTP() {
   const [otp, setOtp] = useState('');
@@ -15,12 +15,38 @@ export default function VerifyOTP() {
     const storedPhone = localStorage.getItem('phoneForVerification');
     const sessionId = localStorage.getItem('sessionId');
     const sessionType = localStorage.getItem('sessionType');
+
     if (!storedPhone || !sessionId || !sessionType) {
       setError('No phone number or session found. Please start over.');
       router.push(sessionType === 'login' ? '/login' : '/signup');
-    } else {
-      setPhone(storedPhone);
+      return;
     }
+
+    setPhone(storedPhone);
+
+    // ✅ Validate backend status to ensure we're at the correct step
+    const checkSignupStatus = async () => {
+      try {
+        if (sessionType === 'signup') {
+          const statusRes = await getSignupStatus(storedPhone);
+          const status = statusRes.data;
+
+          if (status.status === 'completed') {
+            router.push('/login');
+          } else if (status.status === 'phone_verified') {
+            localStorage.setItem('sessionId', status.session_id);
+            router.push('/complete-profile');
+          } else if (status.status === 'new_user') {
+            router.push('/signup');
+          }
+          // Otherwise allow OTP entry
+        }
+      } catch (err) {
+        setError('Failed to check signup status. Try again.');
+      }
+    };
+
+    checkSignupStatus();
   }, [router]);
 
   const handleVerify = async (e) => {
@@ -58,15 +84,14 @@ export default function VerifyOTP() {
           localStorage.removeItem('sessionType');
           router.push('/dashboard');
         } else {
+          localStorage.setItem('sessionId', response.data.data?.sessionId || sessionId);
           router.push('/complete-profile');
         }
       } else {
         setError(response.data.message || 'Invalid OTP. Please try again.');
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message || 'An error occurred. Please try again later.'
-      );
+      setError(err.response?.data?.message || 'An error occurred. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -109,36 +134,50 @@ export default function VerifyOTP() {
     }
   };
 
-  return (
-    <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Enter OTP</h2>
+ return (
+  <div
+    className="min-h-screen flex items-center justify-center"
+    style={{
+      backgroundImage: `
+        radial-gradient(circle at top right, #A5E3FF 0%, transparent 40%),
+        radial-gradient(circle at bottom left, #A5E3FF 0%, transparent 40%)
+      `,
+    }}
+  >
+    <div className="max-w-md w-full p-6 bg-white rounded-lg shadow border border-gray-300">
+      <h2 className="text-2xl font-semibold mb-4">Sign up</h2>
       <form onSubmit={handleVerify}>
+        <label className="block font-medium mb-1">Enter OTP</label>
         <input
           type="text"
-          placeholder="Enter 6-digit OTP"
-          className="w-full border p-2 mb-4"
+          placeholder="Enter OTP"
+          className="w-full border border-gray-300 rounded px-3 py-2 mb-2"
           value={otp}
           onChange={handleOtpChange}
           disabled={isLoading}
           maxLength={6}
         />
+        <p className="text-sm mb-4">
+          Didn't receive the OTP?{' '}
+          <button
+            type="button"
+            onClick={handleResendOtp}
+            className="text-blue-600 font-medium hover:underline disabled:text-gray-400"
+            disabled={isLoading}
+          >
+            Resend
+          </button>
+        </p>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded disabled:bg-blue-300 mb-4"
+          className="w-full bg-blue-600 text-white py-2 rounded mb-2 disabled:bg-blue-300"
           disabled={isLoading || otp.trim().length !== 6}
         >
           {isLoading ? 'Verifying...' : 'Verify'}
         </button>
-        <button
-          type="button"
-          onClick={handleResendOtp}
-          className="w-full bg-gray-500 text-white py-2 rounded disabled:bg-gray-300"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Sending...' : 'Resend OTP'}
-        </button>
       </form>
     </div>
-  );
+  </div>
+);
 }

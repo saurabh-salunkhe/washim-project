@@ -1,5 +1,9 @@
-@import "tailwindcss";
+/* Include Tailwind's styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Your custom global styles */
 html,
 body {
   padding: 0;

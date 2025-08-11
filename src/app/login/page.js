@@ -62,9 +62,19 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded shadow">
-      <h2 className="text-xl font-bold mb-4">Login</h2>
+  <div
+    className="flex items-center justify-center min-h-screen"
+    style={{
+      backgroundImage: `
+        radial-gradient(circle at top left, #A5E3FF 0%, transparent 40%),
+        radial-gradient(circle at bottom right, #A5E3FF 0%, transparent 40%)
+      `,
+    }}
+  >
+    <div className="max-w-md w-full mx-auto p-6 bg-white rounded shadow border-2 border-gray-300">
+      <h2 className="text-2xl font-bold mb-4">Log in</h2>
       <form onSubmit={handleLogin}>
+        <label className="text-sm font-semibold mb-1 block">Phone number</label>
         <div className="flex items-center border p-2 mb-4 rounded">
           <span className="text-gray-500 mr-2">+91</span>
           <input
@@ -87,5 +97,6 @@ export default function Login() {
         </button>
       </form>
     </div>
-  );
+  </div>
+);
 }
