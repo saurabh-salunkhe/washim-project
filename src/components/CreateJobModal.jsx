@@ -1,4 +1,4 @@
-// src/components/CreateJobModal.js
+
 'use client';
 import { useState } from 'react';
 import { X } from 'lucide-react';

@@ -66,7 +66,7 @@ export default function VerifyLoginOtpPage() {
         localStorage.removeItem('sessionType');
         localStorage.removeItem('phone');
 
-        router.push('/dashboard');
+        router.push('/company-profile');
       } else {
         setError(res.data.message || 'OTP verification failed.');
       }
